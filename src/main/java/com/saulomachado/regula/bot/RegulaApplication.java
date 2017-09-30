@@ -20,6 +20,7 @@ public class RegulaApplication {
     }
 
     public static void main(String[] args) {
+        logger.debug("RegulaApplication");
         SpringApplication.run(RegulaApplication.class, args);
     }
 }
