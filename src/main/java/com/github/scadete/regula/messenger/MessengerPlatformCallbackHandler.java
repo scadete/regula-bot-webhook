@@ -52,7 +52,7 @@ public class MessengerPlatformCallbackHandler {
     private final MessengerSendClient sendClient;
 
     @Autowired
-    RegulaTextMessageEventHandler textMessageEventHandler;
+    private RegulaTextMessageEventHandler textMessageEventHandler;
 
     @Autowired
     public MessengerPlatformCallbackHandler(@Value("${messenger4j.appSecret}") final String appSecret,
