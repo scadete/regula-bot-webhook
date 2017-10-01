@@ -39,9 +39,12 @@ public class ChatbotService {
         AIServiceContext context = (new AIServiceContextBuilder()).setSessionId(senderId).build();
         AIDataService service = new AIDataService(aiConfig, context);
 
+
         AIEvent attachmentReceivedEvent = new AIEvent("ATTACHMENT_RECEIVED");
         AIRequest request = new AIRequest();
         request.setEvent(attachmentReceivedEvent);
+
+        logger.debug("Attachment request: {}", request.toString());
 
         try {
             AIResponse response = service.request(request);
