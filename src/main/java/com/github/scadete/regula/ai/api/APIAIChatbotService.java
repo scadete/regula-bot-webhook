@@ -76,6 +76,7 @@ public class APIAIChatbotService implements ChatbotService {
     private ChatbotResponse getResponse(AIResponse aiResponse) {
         ChatbotResponse response = new ChatbotResponse();
 
+        response.setSpeech(aiResponse.getResult().getFulfillment().getSpeech());
         response.setAction(aiResponse.getResult().getAction());
         response.setConfidence((double) aiResponse.getResult().getScore());
         setDataFromAIResponse(response, aiResponse);
@@ -91,7 +92,7 @@ public class APIAIChatbotService implements ChatbotService {
     private void setMessageFromAIResponse(ChatbotResponse response, AIResponse aiResponse) {
         List<ResponseMessage> messageList = aiResponse.getResult().getFulfillment().getMessages();
         for (ResponseMessage message: messageList) {
-            
+
         }
     }
 
