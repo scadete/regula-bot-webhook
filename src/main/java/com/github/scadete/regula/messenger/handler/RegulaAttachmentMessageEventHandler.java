@@ -3,7 +3,6 @@ package com.github.scadete.regula.messenger.handler;
 import com.github.messenger4j.receive.events.AttachmentMessageEvent;
 import com.github.messenger4j.receive.handlers.AttachmentMessageEventHandler;
 import com.github.scadete.regula.ai.ChatbotService;
-import jdk.internal.util.xml.impl.Input;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
