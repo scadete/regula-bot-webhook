@@ -12,15 +12,15 @@ public class ChatbotConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(ChatbotConfiguration.class);
 
     @Value("${ai.clientAccessToken}")
-    private static String CLIENT_ACCESS_TOKEN;
+    private String clientAccessToken;
 
     @Value("${ai.language}")
-    private static String LANGUAGE_TAG;
+    private String languageTag;
 
     @Bean
     public AIConfiguration aiConfiguration() {
-        logger.debug("Initializing ChatbotConfiguration - clientAccessToken: '{}', language: '{}'", CLIENT_ACCESS_TOKEN, LANGUAGE_TAG);
-        return new AIConfiguration(CLIENT_ACCESS_TOKEN, AIConfiguration.SupportedLanguages.fromLanguageTag(LANGUAGE_TAG));
+        logger.debug("Initializing ChatbotConfiguration - clientAccessToken: '{}', language: '{}'", clientAccessToken, languageTag);
+        return new AIConfiguration(clientAccessToken, AIConfiguration.SupportedLanguages.fromLanguageTag(languageTag));
     }
 
 }
