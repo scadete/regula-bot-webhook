@@ -34,7 +34,9 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
         logger.info("Received message '{}' with attachments from user '{}' at '{}':",
                 messageId, senderId, timestamp);
 
-        chatbot.attachment(senderId);
+        String response = chatbot.attachment(senderId);
+
+        sendTextMessage(senderId, response);
 
         attachments.forEach(attachment -> {
             final AttachmentMessageEvent.AttachmentType attachmentType = attachment.getType();
