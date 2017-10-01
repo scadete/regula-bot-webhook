@@ -20,6 +20,10 @@ public class RegulaTextMessageEventHandler extends RegulaEventHandler implements
     @Autowired
     ChatbotService chatbot;
 
+    public RegulaTextMessageEventHandler() {
+        logger.debug("new RegulaTextMessageEventHandler");
+    }
+
     @Override
     public void handle(TextMessageEvent event) {
         logger.debug("Received TextMessageEvent: {}", event);
