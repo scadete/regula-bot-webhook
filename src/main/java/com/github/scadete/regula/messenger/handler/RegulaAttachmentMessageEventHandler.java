@@ -3,11 +3,15 @@ package com.github.scadete.regula.messenger.handler;
 import com.github.messenger4j.receive.events.AttachmentMessageEvent;
 import com.github.messenger4j.receive.handlers.AttachmentMessageEventHandler;
 import com.github.scadete.regula.ai.ChatbotService;
+import jdk.internal.util.xml.impl.Input;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
@@ -34,21 +38,32 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
         logger.info("Received message '{}' with attachments from user '{}' at '{}':",
                 messageId, senderId, timestamp);
 
-        String response = chatbot.attachment(senderId);
-
-        sendTextMessage(senderId, response);
 
         attachments.forEach(attachment -> {
             final AttachmentMessageEvent.AttachmentType attachmentType = attachment.getType();
             final AttachmentMessageEvent.Payload payload = attachment.getPayload();
+            String response = "";
 
             String payloadAsString = null;
             if (payload.isBinaryPayload()) {
                 payloadAsString = payload.asBinaryPayload().getUrl();
+
+                if (attachment.equals("AUDIO")) {
+                    try {
+                        InputStream voiceStream = new URL(payload.asBinaryPayload().getUrl()).openStream();
+                        response = chatbot.audio(voiceStream, senderId);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    response = chatbot.attachment(senderId);
+                }
             }
             if (payload.isLocationPayload()) {
                 payloadAsString = payload.asLocationPayload().getCoordinates().toString();
             }
+
+            sendTextMessage(senderId, response);
 
             logger.info("Attachment of type '{}' with payload '{}'", attachmentType, payloadAsString);
         });

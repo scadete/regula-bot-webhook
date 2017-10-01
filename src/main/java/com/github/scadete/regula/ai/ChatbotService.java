@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+
 @Component
 public class ChatbotService {
 
@@ -43,6 +45,22 @@ public class ChatbotService {
 
         try {
             AIResponse response = service.request(request);
+
+            return response.getResult().getFulfillment().getSpeech();
+        } catch (AIServiceException e) {
+            logger.error(e.getMessage(),e);
+            e.printStackTrace();
+        }
+        return "Desculpe, mas não estou conseguindo pensar...";
+    }
+
+    public String audio(InputStream voiceStream, String senderId) {
+        logger.debug("ChatbotService audio - from: '{}'", senderId);
+        AIServiceContext context = (new AIServiceContextBuilder()).setSessionId(senderId).build();
+        AIDataService service = new AIDataService(aiConfig, context);
+
+        try {
+            AIResponse response = service.voiceRequest(voiceStream);
 
             return response.getResult().getFulfillment().getSpeech();
         } catch (AIServiceException e) {
