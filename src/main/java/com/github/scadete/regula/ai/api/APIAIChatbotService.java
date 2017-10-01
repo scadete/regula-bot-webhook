@@ -90,10 +90,7 @@ public class APIAIChatbotService implements ChatbotService {
     }
 
     private void setMessageFromAIResponse(ChatbotResponse response, AIResponse aiResponse) {
-        List<ResponseMessage> messageList = aiResponse.getResult().getFulfillment().getMessages();
-        for (ResponseMessage message: messageList) {
-
-        }
+        // TODO
     }
 
 }

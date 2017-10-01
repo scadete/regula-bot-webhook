@@ -6,6 +6,7 @@ import com.github.messenger4j.receive.events.TextMessageEvent;
 import com.github.messenger4j.receive.handlers.TextMessageEventHandler;
 import com.github.messenger4j.send.SenderAction;
 import com.github.scadete.regula.ai.ChatbotRequest;
+import com.github.scadete.regula.ai.ChatbotResponse;
 import com.github.scadete.regula.ai.ChatbotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,13 @@ public class RegulaTextMessageEventHandler extends RegulaEventHandler implements
         try {
             this.sendClient.sendSenderAction(senderId, SenderAction.MARK_SEEN);
             ChatbotRequest request = new ChatbotRequest(messageText, senderId);
-            String sendText = chatbot.textMessage(new ChatbotRequest(messageText, senderId)).getSpeech();
-            sendTextMessage(senderId, sendText);
+            ChatbotResponse response = chatbot.textMessage(new ChatbotRequest(messageText, senderId));
+
+            ChatbotResponse finalResponse = fullfillResponse(response);
+
+            sendTextMessage(senderId, finalResponse.getSpeech());
         } catch (MessengerApiException | MessengerIOException e) {
-            logger.error("Message could not be sent. An unexpected error occurred.", e);        }
+            logger.error("Message could not be sent. An unexpected error occurred.", e); }
     }
+
 }

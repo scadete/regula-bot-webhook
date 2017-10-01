@@ -5,6 +5,7 @@ import com.github.messenger4j.exceptions.MessengerIOException;
 import com.github.messenger4j.send.MessengerSendClient;
 import com.github.messenger4j.send.NotificationType;
 import com.github.messenger4j.send.Recipient;
+import com.github.scadete.regula.ai.ChatbotResponse;
 import com.github.scadete.regula.ai.ChatbotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,26 @@ public abstract class RegulaEventHandler {
         } catch (MessengerApiException | MessengerIOException e) {
             handleSendException(e);
         }
+    }
+
+    protected ChatbotResponse fullfillResponse(ChatbotResponse initialResponse) {
+        ChatbotResponse response = new ChatbotResponse();
+
+        String action = initialResponse.getAction();
+        logger.debug("Action: '{}'", action);
+
+        switch (action) {
+            case "process.solve":
+                break;
+            case "process.status":
+                break;
+            case "attachment.send":
+                break;
+            default:
+                return initialResponse;
+        }
+
+        return response;
     }
 
     private void handleSendException(Exception e) {
