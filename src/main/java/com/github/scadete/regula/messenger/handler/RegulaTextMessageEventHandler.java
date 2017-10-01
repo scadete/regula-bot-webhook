@@ -9,7 +9,6 @@ import com.github.scadete.regula.ai.ChatbotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -39,7 +38,7 @@ public class RegulaTextMessageEventHandler extends RegulaEventHandler implements
 
         try {
             this.sendClient.sendSenderAction(senderId, SenderAction.MARK_SEEN);
-            String sendText = chatbot.getResponse(messageText, senderId);
+            String sendText = chatbot.textMessage(messageText, senderId);
             sendTextMessage(senderId, sendText);
         } catch (MessengerApiException | MessengerIOException e) {
             logger.error("Message could not be sent. An unexpected error occurred.", e);        }
