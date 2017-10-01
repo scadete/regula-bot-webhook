@@ -1,4 +1,4 @@
-package com.saulomachado.regula.bot.messenger;
+package com.github.scadete.regula.messenger;
 
 
 import static com.github.messenger4j.MessengerPlatform.CHALLENGE_REQUEST_PARAM_NAME;
@@ -7,8 +7,6 @@ import static com.github.messenger4j.MessengerPlatform.SIGNATURE_HEADER_NAME;
 import static com.github.messenger4j.MessengerPlatform.VERIFY_TOKEN_REQUEST_PARAM_NAME;
 
 import com.github.messenger4j.MessengerPlatform;
-import com.github.messenger4j.exceptions.MessengerApiException;
-import com.github.messenger4j.exceptions.MessengerIOException;
 import com.github.messenger4j.exceptions.MessengerVerificationException;
 import com.github.messenger4j.receive.MessengerReceiveClient;
 import com.github.messenger4j.receive.events.AccountLinkingEvent.AccountLinkingStatus;
@@ -24,18 +22,12 @@ import com.github.messenger4j.receive.handlers.MessageReadEventHandler;
 import com.github.messenger4j.receive.handlers.OptInEventHandler;
 import com.github.messenger4j.receive.handlers.PostbackEventHandler;
 import com.github.messenger4j.receive.handlers.QuickReplyMessageEventHandler;
-import com.github.messenger4j.receive.handlers.TextMessageEventHandler;
 import com.github.messenger4j.send.MessengerSendClient;
-import com.github.messenger4j.send.NotificationType;
-import com.github.messenger4j.send.QuickReply;
-import com.github.messenger4j.send.Recipient;
 import com.github.messenger4j.send.SenderAction;
-import com.github.messenger4j.send.buttons.Button;
-import com.github.messenger4j.send.templates.ButtonTemplate;
-import com.github.messenger4j.send.templates.GenericTemplate;
-import com.github.messenger4j.send.templates.ReceiptTemplate;
 import java.util.Date;
 import java.util.List;
+
+import com.github.scadete.regula.messenger.handler.RegulaTextMessageEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,33 +41,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * This is the main class for inbound and outbound communication with the Facebook Messenger Platform.
- * The callback handler is responsible for the webhook verification and processing of the inbound messages and events.
- * It showcases the features of the Messenger Platform.
- *
- * @author Max Grabenhorst
- */
 @RestController
-@RequestMapping("/callback")
+@RequestMapping("/webhook/messenger")
 public class MessengerPlatformCallbackHandler {
 
-    private static final String RESOURCE_URL =
-            "https://raw.githubusercontent.com/fbsamples/messenger-platform-samples/master/node/public";
 
     private static final Logger logger = LoggerFactory.getLogger(MessengerPlatformCallbackHandler.class);
 
     private final MessengerReceiveClient receiveClient;
     private final MessengerSendClient sendClient;
 
-    /**
-     * Constructs the {@code MessengerPlatformCallbackHandler} and initializes the {@code MessengerReceiveClient}.
-     *
-     * @param appSecret   the {@code Application Secret}
-     * @param verifyToken the {@code Verification Token} that has been provided by you during the setup of the {@code
-     *                    Webhook}
-     * @param sendClient  the initialized {@code MessengerSendClient}
-     */
+    @Autowired
+    RegulaTextMessageEventHandler textMessageEventHandler;
+
     @Autowired
     public MessengerPlatformCallbackHandler(@Value("${messenger4j.appSecret}") final String appSecret,
                                             @Value("${messenger4j.verifyToken}") final String verifyToken,
@@ -83,7 +61,7 @@ public class MessengerPlatformCallbackHandler {
 
         logger.debug("Initializing MessengerReceiveClient - appSecret: {} | verifyToken: {}", appSecret, verifyToken);
         this.receiveClient = MessengerPlatform.newReceiveClientBuilder(appSecret, verifyToken)
-                .onTextMessageEvent(newTextMessageEventHandler())
+                .onTextMessageEvent(textMessageEventHandler)
                 .onAttachmentMessageEvent(newAttachmentMessageEventHandler())
                 .onQuickReplyMessageEvent(newQuickReplyMessageEventHandler())
                 .onPostbackEvent(newPostbackEventHandler())
@@ -136,208 +114,6 @@ public class MessengerPlatformCallbackHandler {
         }
     }
 
-    private TextMessageEventHandler newTextMessageEventHandler() {
-        return event -> {
-            logger.debug("Received TextMessageEvent: {}", event);
-
-            final String messageId = event.getMid();
-            final String messageText = event.getText();
-            final String senderId = event.getSender().getId();
-            final Date timestamp = event.getTimestamp();
-
-            logger.info("Received message '{}' with text '{}' from user '{}' at '{}'",
-                    messageId, messageText, senderId, timestamp);
-
-            try {
-                switch (messageText.toLowerCase()) {
-                    case "image":
-                        sendImageMessage(senderId);
-                        break;
-
-                    case "gif":
-                        sendGifMessage(senderId);
-                        break;
-
-                    case "audio":
-                        sendAudioMessage(senderId);
-                        break;
-
-                    case "video":
-                        sendVideoMessage(senderId);
-                        break;
-
-                    case "file":
-                        sendFileMessage(senderId);
-                        break;
-
-                    case "button":
-                        sendButtonMessage(senderId);
-                        break;
-
-                    case "generic":
-                        sendGenericMessage(senderId);
-                        break;
-
-                    case "receipt":
-                        sendReceiptMessage(senderId);
-                        break;
-
-                    case "quick reply":
-                        sendQuickReply(senderId);
-                        break;
-
-                    case "read receipt":
-                        sendReadReceipt(senderId);
-                        break;
-
-                    case "typing on":
-                        sendTypingOn(senderId);
-                        break;
-
-                    case "typing off":
-                        sendTypingOff(senderId);
-                        break;
-
-                    /*
-                    case "account linking":
-                        sendAccountLinking(senderId);
-                        break;
-                    */
-
-                    default:
-                        sendTextMessage(senderId, messageText);
-                }
-            } catch (MessengerApiException | MessengerIOException e) {
-                handleSendException(e);
-            }
-        };
-    }
-
-    private void sendImageMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.sendClient.sendImageAttachment(recipientId, RESOURCE_URL + "/assets/rift.png");
-    }
-
-    private void sendGifMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.sendClient.sendImageAttachment(recipientId, "https://media.giphy.com/media/11sBLVxNs7v6WA/giphy.gif");
-    }
-
-    private void sendAudioMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.sendClient.sendAudioAttachment(recipientId, RESOURCE_URL + "/assets/sample.mp3");
-    }
-
-    private void sendVideoMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.sendClient.sendVideoAttachment(recipientId, RESOURCE_URL + "/assets/allofus480.mov");
-    }
-
-    private void sendFileMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.sendClient.sendFileAttachment(recipientId, RESOURCE_URL + "/assets/test.txt");
-    }
-
-    private void sendButtonMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        final List<Button> buttons = Button.newListBuilder()
-                .addUrlButton("Open Web URL", "https://www.oculus.com/en-us/rift/").toList()
-                .addPostbackButton("Trigger Postback", "DEVELOPER_DEFINED_PAYLOAD").toList()
-                .addCallButton("Call Phone Number", "+16505551234").toList()
-                .build();
-
-        final ButtonTemplate buttonTemplate = ButtonTemplate.newBuilder("Tap a button", buttons).build();
-        this.sendClient.sendTemplate(recipientId, buttonTemplate);
-    }
-
-    private void sendGenericMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        final List<Button> riftButtons = Button.newListBuilder()
-                .addUrlButton("Open Web URL", "https://www.oculus.com/en-us/rift/").toList()
-                .addPostbackButton("Call Postback", "Payload for first bubble").toList()
-                .build();
-
-        final List<Button> touchButtons = Button.newListBuilder()
-                .addUrlButton("Open Web URL", "https://www.oculus.com/en-us/touch/").toList()
-                .addPostbackButton("Call Postback", "Payload for second bubble").toList()
-                .build();
-
-
-        final GenericTemplate genericTemplate = GenericTemplate.newBuilder()
-                .addElements()
-                .addElement("rift")
-                .subtitle("Next-generation virtual reality")
-                .itemUrl("https://www.oculus.com/en-us/rift/")
-                .imageUrl(RESOURCE_URL + "/assets/rift.png")
-                .buttons(riftButtons)
-                .toList()
-                .addElement("touch")
-                .subtitle("Your Hands, Now in VR")
-                .itemUrl("https://www.oculus.com/en-us/touch/")
-                .imageUrl(RESOURCE_URL + "/assets/touch.png")
-                .buttons(touchButtons)
-                .toList()
-                .done()
-                .build();
-
-        this.sendClient.sendTemplate(recipientId, genericTemplate);
-    }
-
-    private void sendReceiptMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        final String uniqueReceiptId = "order-" + Math.floor(Math.random() * 1000);
-
-        final ReceiptTemplate receiptTemplate = ReceiptTemplate.newBuilder("Peter Chang", uniqueReceiptId, "USD", "Visa 1234")
-                .timestamp(1428444852L)
-                .addElements()
-                .addElement("Oculus Rift", 599.00f)
-                .subtitle("Includes: headset, sensor, remote")
-                .quantity(1)
-                .currency("USD")
-                .imageUrl(RESOURCE_URL + "/assets/riftsq.png")
-                .toList()
-                .addElement("Samsung Gear VR", 99.99f)
-                .subtitle("Frost White")
-                .quantity(1)
-                .currency("USD")
-                .imageUrl(RESOURCE_URL + "/assets/gearvrsq.png")
-                .toList()
-                .done()
-                .addAddress("1 Hacker Way", "Menlo Park", "94025", "CA", "US").done()
-                .addSummary(626.66f)
-                .subtotal(698.99f)
-                .shippingCost(20.00f)
-                .totalTax(57.67f)
-                .done()
-                .addAdjustments()
-                .addAdjustment().name("New Customer Discount").amount(-50f).toList()
-                .addAdjustment().name("$100 Off Coupon").amount(-100f).toList()
-                .done()
-                .build();
-
-        this.sendClient.sendTemplate(recipientId, receiptTemplate);
-    }
-
-    private void sendQuickReply(String recipientId) throws MessengerApiException, MessengerIOException {
-        final List<QuickReply> quickReplies = QuickReply.newListBuilder()
-                .addTextQuickReply("Action", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
-                .addTextQuickReply("Comedy", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY").toList()
-                .addTextQuickReply("Drama", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA").toList()
-                .addLocationQuickReply().toList()
-                .build();
-
-        this.sendClient.sendTextMessage(recipientId, "What's your favorite movie genre?", quickReplies);
-    }
-
-    private void sendReadReceipt(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.sendClient.sendSenderAction(recipientId, SenderAction.MARK_SEEN);
-    }
-
-    private void sendTypingOn(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.sendClient.sendSenderAction(recipientId, SenderAction.TYPING_ON);
-    }
-
-    private void sendTypingOff(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.sendClient.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
-    }
-
-    private void sendAccountLinking(String recipientId) {
-        // supported by messenger4j since 0.7.0
-        // sample implementation coming soon
-    }
-
     private AttachmentMessageEventHandler newAttachmentMessageEventHandler() {
         return event -> {
             logger.debug("Received AttachmentMessageEvent: {}", event);
@@ -364,8 +140,6 @@ public class MessengerPlatformCallbackHandler {
 
                 logger.info("Attachment of type '{}' with payload '{}'", attachmentType, payloadAsString);
             });
-
-            sendTextMessage(senderId, "Message with attachment received");
         };
     }
 
@@ -378,8 +152,6 @@ public class MessengerPlatformCallbackHandler {
             final String quickReplyPayload = event.getQuickReply().getPayload();
 
             logger.info("Received quick reply for message '{}' with payload '{}'", messageId, quickReplyPayload);
-
-            sendTextMessage(senderId, "Quick reply tapped");
         };
     }
 
@@ -394,8 +166,6 @@ public class MessengerPlatformCallbackHandler {
 
             logger.info("Received postback for user '{}' and page '{}' with payload '{}' at '{}'",
                     senderId, recipientId, payload, timestamp);
-
-            sendTextMessage(senderId, "Postback called");
         };
     }
 
@@ -423,8 +193,6 @@ public class MessengerPlatformCallbackHandler {
 
             logger.info("Received authentication for user '{}' and page '{}' with pass through param '{}' at '{}'",
                     senderId, recipientId, passThroughParam, timestamp);
-
-            sendTextMessage(senderId, "Authentication successful");
         };
     }
 
@@ -485,19 +253,4 @@ public class MessengerPlatformCallbackHandler {
         };
     }
 
-    private void sendTextMessage(String recipientId, String text) {
-        try {
-            final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
-            final NotificationType notificationType = NotificationType.REGULAR;
-            final String metadata = "DEVELOPER_DEFINED_METADATA";
-
-            this.sendClient.sendTextMessage(recipient, notificationType, text, metadata);
-        } catch (MessengerApiException | MessengerIOException e) {
-            handleSendException(e);
-        }
-    }
-
-    private void handleSendException(Exception e) {
-        logger.error("Message could not be sent. An unexpected error occurred.", e);
-    }
 }
