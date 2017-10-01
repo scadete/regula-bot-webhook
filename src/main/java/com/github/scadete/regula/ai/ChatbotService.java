@@ -40,9 +40,7 @@ public class ChatbotService {
         AIDataService service = new AIDataService(aiConfig, context);
 
 
-        AIEvent attachmentReceivedEvent = new AIEvent("ATTACHMENT_RECEIVED");
-        AIRequest request = new AIRequest("ATTACHMENT_RECEIVED");
-        request.setEvent(attachmentReceivedEvent);
+        AIRequest request = new AIRequest("e=ATTACHMENT_RECEIVED");
 
         logger.debug("Attachment request: {}", request.toString());
 
