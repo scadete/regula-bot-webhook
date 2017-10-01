@@ -22,7 +22,7 @@ public class ChatbotService {
         AIDataService service = new AIDataService(aiConfig, context);
         try {
             AIResponse response = service.request(new AIRequest(message));
-            return response.getResult().getFulfillment().getDisplayText();
+            return response.getResult().getFulfillment().getSpeech();
         } catch (AIServiceException e) {
             logger.error(e.getMessage(),e);
             e.printStackTrace();
