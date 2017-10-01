@@ -47,7 +47,7 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
             if (payload.isBinaryPayload()) {
                 payloadAsString = payload.asBinaryPayload().getUrl();
 
-                if (attachment.equals("AUDIO")) {
+                if (attachmentType.equals("AUDIO")) {
                     try {
                         InputStream voiceStream = new URL(payload.asBinaryPayload().getUrl()).openStream();
                         response = chatbot.audio(voiceStream, senderId);
