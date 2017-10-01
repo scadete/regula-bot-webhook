@@ -10,21 +10,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackages = {
-        "com.github.scadete.regula.ai"
+        "com.github.scadete.regula.ai.api",
+        "com.github.scadete.regula.ai.wit"
 })
 public class ChatbotConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(ChatbotConfiguration.class);
-
-    @Value("${ai.clientAccessToken}")
-    private String clientAccessToken;
-
-    @Value("${ai.language}")
-    private String languageTag;
-
-    @Bean
-    public AIConfiguration aiConfiguration() {
-        logger.debug("Initializing ChatbotConfiguration - clientAccessToken: '{}', language: '{}'", clientAccessToken, languageTag);
-        return new AIConfiguration(clientAccessToken, AIConfiguration.SupportedLanguages.fromLanguageTag(languageTag));
-    }
-
 }

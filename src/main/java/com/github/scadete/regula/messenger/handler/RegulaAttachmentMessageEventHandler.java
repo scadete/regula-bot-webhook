@@ -2,6 +2,7 @@ package com.github.scadete.regula.messenger.handler;
 
 import com.github.messenger4j.receive.events.AttachmentMessageEvent;
 import com.github.messenger4j.receive.handlers.AttachmentMessageEventHandler;
+import com.github.scadete.regula.ai.ChatbotRequest;
 import com.github.scadete.regula.ai.ChatbotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,12 +51,12 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
                 if (attachmentType.equals(AttachmentMessageEvent.AttachmentType.AUDIO)) {
                     try {
                         InputStream voiceStream = new URL(payload.asBinaryPayload().getUrl()).openStream();
-                        response = chatbot.audio(voiceStream, senderId);
+                        response = chatbot.voiceMessage(new ChatbotRequest(voiceStream, senderId)).getSpeech();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    response = chatbot.attachment(senderId);
+                    response = chatbot.attachment(new ChatbotRequest(senderId)).getSpeech();
                 }
             }
             if (payload.isLocationPayload()) {
