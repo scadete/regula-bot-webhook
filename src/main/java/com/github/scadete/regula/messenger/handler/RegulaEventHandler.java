@@ -84,7 +84,6 @@ public abstract class RegulaEventHandler {
         }
 
         request.setEvent(event);
-
         ChatbotResponse response = chatbot.converse(request);
         return response;
     }
