@@ -40,10 +40,11 @@ public class RegulaTextMessageEventHandler extends RegulaEventHandler implements
         try {
             this.sendClient.sendSenderAction(senderId, SenderAction.MARK_SEEN);
             ChatbotRequest request = new ChatbotRequest(messageText, senderId);
+            
             ChatbotResponse response = chatbot.textMessage(new ChatbotRequest(messageText, senderId));
+            sendTextMessage(senderId, response.getSpeech());
 
             ChatbotResponse finalResponse = fullfillResponse(response);
-
             sendTextMessage(senderId, finalResponse.getSpeech());
         } catch (MessengerApiException | MessengerIOException e) {
             logger.error("Message could not be sent. An unexpected error occurred.", e); }
