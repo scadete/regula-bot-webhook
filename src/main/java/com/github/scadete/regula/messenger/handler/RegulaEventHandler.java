@@ -33,14 +33,16 @@ public abstract class RegulaEventHandler {
 
     protected void sendTextMessage(String recipientId, String text) {
         logger.debug("sendTextMessage: '{}' to: '{}'", text, recipientId);
-        try {
-            final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
-            final NotificationType notificationType = NotificationType.REGULAR;
-            final String metadata = "DEVELOPER_DEFINED_METADATA";
+        if (text!= null && !text.isEmpty()) {
+            try {
+                final Recipient recipient = Recipient.newBuilder().recipientId(recipientId).build();
+                final NotificationType notificationType = NotificationType.REGULAR;
+                final String metadata = "DEVELOPER_DEFINED_METADATA";
 
-            this.sendClient.sendTextMessage(recipient, notificationType, text, metadata);
-        } catch (MessengerApiException | MessengerIOException e) {
-            handleSendException(e);
+                this.sendClient.sendTextMessage(recipient, notificationType, text, metadata);
+            } catch (MessengerApiException | MessengerIOException e) {
+                handleSendException(e);
+            }
         }
     }
 
