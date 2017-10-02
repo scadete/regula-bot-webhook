@@ -11,6 +11,7 @@ public class ChatbotResponse {
     private Double confidence;
     private String speech;
     private String message;
+    private String sessionId;
 
     private Map<String, JsonElement> data;
 
@@ -52,5 +53,13 @@ public class ChatbotResponse {
 
     public void setData(Map<String, JsonElement> data) {
         this.data = data;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 }

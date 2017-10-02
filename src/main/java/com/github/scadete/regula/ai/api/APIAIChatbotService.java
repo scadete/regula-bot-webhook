@@ -81,6 +81,7 @@ public class APIAIChatbotService implements ChatbotService {
         response.setConfidence((double) aiResponse.getResult().getScore());
         setDataFromAIResponse(response, aiResponse);
         setMessageFromAIResponse(response, aiResponse);
+        response.setSessionId(aiResponse.getSessionId());
 
         return response;
     }

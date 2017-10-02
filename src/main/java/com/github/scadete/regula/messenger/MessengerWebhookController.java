@@ -10,7 +10,6 @@ import com.github.messenger4j.MessengerPlatform;
 import com.github.messenger4j.exceptions.MessengerVerificationException;
 import com.github.messenger4j.receive.MessengerReceiveClient;
 import com.github.messenger4j.receive.handlers.FallbackEventHandler;
-import com.github.messenger4j.send.MessengerSendClient;
 
 import com.github.scadete.regula.messenger.handler.RegulaAttachmentMessageEventHandler;
 import com.github.scadete.regula.messenger.handler.RegulaTextMessageEventHandler;
@@ -35,13 +34,11 @@ public class MessengerWebhookController {
     private static final Logger logger = LoggerFactory.getLogger(MessengerWebhookController.class);
 
     private final MessengerReceiveClient receiveClient;
-    private final MessengerSendClient sendClient;
 
 
     @Autowired
     public MessengerWebhookController(@Value("${messenger4j.appSecret}") final String appSecret,
                                       @Value("${messenger4j.verifyToken}") final String verifyToken,
-                                      final MessengerSendClient sendClient,
                                       final RegulaTextMessageEventHandler textMessageEventHandler,
                                       final RegulaAttachmentMessageEventHandler attachmentMessageEventHandler) {
 
@@ -51,7 +48,6 @@ public class MessengerWebhookController {
                 .onAttachmentMessageEvent(attachmentMessageEventHandler)
                 .fallbackEventHandler(newFallbackEventHandler())
                 .build();
-        this.sendClient = sendClient;
     }
 
     /**

@@ -31,6 +31,7 @@ public class RegulaTextMessageEventHandler extends RegulaEventHandler implements
         final String messageId = event.getMid();
         final String messageText = event.getText();
         final String senderId = event.getSender().getId();
+
         final Date timestamp = event.getTimestamp();
 
         logger.info("Received message '{}' with text '{}' from user '{}' at '{}'",
