@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public abstract class RegulaEventHandler {
@@ -67,17 +69,18 @@ public abstract class RegulaEventHandler {
     private ChatbotResponse processSolveAction(ChatbotResponse initialResponse) {
         String message = "e=RETURN_PROCESS_NOT_FOUND";
         String processId = initialResponse.getData().get("businessKey").getAsString();
+        Map<String, String> requestParameters = new HashMap<>();
 
         // FIXME Sample Business Rule
         if (processId.endsWith("F")) {
             message = "e=RETURN_PROCESS_FOUND";
+            requestParameters.put("reviewText", "Este é um exemplo de texto de revisão\r\nAtt.,\r\nRevisor.");
         }
 
-        ChatbotRequest request = new ChatbotRequest(message, initialResponse.getSessionId());
+        ChatbotRequest request = new ChatbotRequest(message, initialResponse.getSessionId(), requestParameters);
         ChatbotResponse response = chatbot.textMessage(request);
         return response;
     }
-
 
     private ChatbotResponse processStatusAction(ChatbotResponse initialResponse) {
         return initialResponse; // TODO

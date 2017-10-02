@@ -1,12 +1,15 @@
 package com.github.scadete.regula.ai;
 
 import java.io.InputStream;
+import java.util.Map;
 
 public class ChatbotRequest {
     private String message;
     private String sessionId;
 
     private InputStream voiceStream;
+
+    private Map<String, String> parameters;
 
     public ChatbotRequest(String message, String sessionId) {
         this.message = message;
@@ -16,6 +19,12 @@ public class ChatbotRequest {
     public ChatbotRequest(InputStream voiceStream, String sessionId) {
         this.voiceStream = voiceStream;
         this.sessionId = sessionId;
+    }
+
+    public ChatbotRequest(String message, String sessionId, Map<String, String> parameters) {
+        this.message = message;
+        this.sessionId = sessionId;
+        this.parameters = parameters;
     }
 
     public ChatbotRequest(String sessionId) {
@@ -44,5 +53,13 @@ public class ChatbotRequest {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 }

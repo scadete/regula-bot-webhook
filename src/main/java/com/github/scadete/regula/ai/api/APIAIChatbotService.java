@@ -1,10 +1,7 @@
 package com.github.scadete.regula.ai.api;
 
 import ai.api.*;
-import ai.api.model.AIOutputContext;
-import ai.api.model.AIRequest;
-import ai.api.model.AIResponse;
-import ai.api.model.ResponseMessage;
+import ai.api.model.*;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.github.scadete.regula.ai.ChatbotContext;
 import com.github.scadete.regula.ai.ChatbotRequest;
@@ -16,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component("apiaiChatbotService")
 public class APIAIChatbotService implements ChatbotService {
@@ -42,10 +36,21 @@ public class APIAIChatbotService implements ChatbotService {
         logger.debug("ChatbotService textMessage -  message: '{}', from: '{}'",
                 request.getMessage(),
                 request.getSessionId());
+
         AIServiceContext context = (new AIServiceContextBuilder()).setSessionId(request.getSessionId()).build();
         AIDataService service = new AIDataService(aiConfig, context);
+
         try {
-            AIResponse response = service.request(new AIRequest(request.getMessage()));
+            Map<String, String> requestParameters = request.getParameters();
+            if (requestParameters != null && !requestParameters.isEmpty())
+            {
+                AIContext requestContext = new AIContext(UUID.randomUUID().toString());
+                requestContext.setLifespan(1);
+                requestContext.setParameters(requestParameters);
+                service.addActiveContext(requestContext);
+            }
+
+            AIResponse response = service.request(new AIRequest(request.getMessage()), context);
             return getResponse(response);
         } catch (AIServiceException e) {
             logger.error(e.getMessage(),e);
