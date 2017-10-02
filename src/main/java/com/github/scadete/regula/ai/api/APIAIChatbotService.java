@@ -51,7 +51,7 @@ public class APIAIChatbotService implements ChatbotService {
                 requestContext.setLifespan(1);
                 requestContext.setParameters(requestParameters);
                 aiRequest.addContext(requestContext);
-                logger.debug("New request context: '{}'", requestContext);
+                logger.debug("New request context: '{}'", requestContext.getName());
             }
 
             AIResponse response = service.request(aiRequest, context);
