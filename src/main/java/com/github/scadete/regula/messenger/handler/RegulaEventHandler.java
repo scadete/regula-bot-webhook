@@ -5,10 +5,11 @@ import com.github.messenger4j.exceptions.MessengerIOException;
 import com.github.messenger4j.send.MessengerSendClient;
 import com.github.messenger4j.send.NotificationType;
 import com.github.messenger4j.send.Recipient;
+import com.github.scadete.regula.ai.ChatbotContext;
 import com.github.scadete.regula.ai.ChatbotRequest;
 import com.github.scadete.regula.ai.ChatbotResponse;
 import com.github.scadete.regula.ai.ChatbotService;
-import com.google.gson.JsonElement;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,16 +69,19 @@ public abstract class RegulaEventHandler {
 
     private ChatbotResponse processSolveAction(ChatbotResponse initialResponse) {
         String message = "e=RETURN_PROCESS_NOT_FOUND";
-        String processId = initialResponse.getData().get("businessKey").getAsString();
+        ChatbotRequest request = new ChatbotRequest(message, initialResponse.getSessionId());
+
         Map<String, String> requestParameters = new HashMap<>();
 
         // FIXME Sample Business Rule
+        String processId = initialResponse.getData().get("businessKey").getAsString();
         if (processId.endsWith("F")) {
             message = "e=RETURN_PROCESS_FOUND";
             requestParameters.put("reviewText", "Este é um exemplo de texto de revisão\r\nAtt.,\r\nRevisor.");
+            request.setMessage(message);
+            request.addContext(new ChatbotContext("process-solve-params", requestParameters));
         }
 
-        ChatbotRequest request = new ChatbotRequest(message, initialResponse.getSessionId(), requestParameters);
         ChatbotResponse response = chatbot.textMessage(request);
         return response;
     }

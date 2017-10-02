@@ -1,16 +1,21 @@
 package com.github.scadete.regula.ai;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class ChatbotRequest {
     private String message;
+    private String action;
     private String sessionId;
 
     private InputStream voiceStream;
 
     List<ChatbotContext> contextList;
+
+    public ChatbotRequest() {
+    }
 
     public ChatbotRequest(String message, String sessionId) {
         this.message = message;
@@ -62,5 +67,20 @@ public class ChatbotRequest {
 
     public void setContextList(List<ChatbotContext> contextList) {
         this.contextList = contextList;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public void addContext(ChatbotContext context) {
+        if (this.contextList == null) {
+            this.contextList = new ArrayList<>();
+        }
+        this.contextList.add(context);
     }
 }
