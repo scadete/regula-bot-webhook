@@ -100,6 +100,7 @@ public class APIAIChatbotService implements ChatbotService {
             dataMap = new HashMap<>();
         }
         dataMap.putAll(aiResponse.getResult().getParameters());
+        response.setData(dataMap);
     }
 
     private void setMessageFromAIResponse(ChatbotResponse response, AIResponse aiResponse) {
