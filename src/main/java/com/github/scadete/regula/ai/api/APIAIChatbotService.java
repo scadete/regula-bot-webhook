@@ -2,7 +2,6 @@ package com.github.scadete.regula.ai.api;
 
 import ai.api.*;
 import ai.api.model.*;
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.github.scadete.regula.ai.ChatbotContext;
 import com.github.scadete.regula.ai.ChatbotRequest;
 import com.github.scadete.regula.ai.ChatbotResponse;
@@ -42,19 +41,9 @@ public class APIAIChatbotService implements ChatbotService {
 
         AIRequest aiRequest = new AIRequest(request.getMessage());
         aiRequest.setSessionId(request.getSessionId());
+        setContextFromChatbotRequest(aiRequest, request);
 
         try {
-            Map<String, String> requestParameters = request.getParameters();
-            if (requestParameters != null && !requestParameters.isEmpty())
-            {
-                AIContext requestContext = new AIContext(UUID.randomUUID().toString());
-                requestContext.setLifespan(1);
-                requestContext.setParameters(requestParameters);
-                aiRequest.addContext(requestContext);
-                logger.debug("New request context: '{}'", requestContext.getName());
-                service.addActiveContext(requestContext);
-            }
-
             AIResponse response = service.request(aiRequest);
             logger.debug(response.getResult().toString());
             return getResponse(response);
@@ -118,14 +107,17 @@ public class APIAIChatbotService implements ChatbotService {
         // TODO
     }
 
-    private void setContextsFromAIResponse(ChatbotResponse response, AIResponse aiResponse) {
-        List<ChatbotContext> contexts = new ArrayList<>();
-        List<AIOutputContext> aiContexts = aiResponse.getResult().getContexts();
-        for (AIOutputContext aiContext: aiContexts
-             ) {
-            contexts.add(new ChatbotContext(aiContext.getName(), aiContext.getParameters()));
+    private void setContextFromChatbotRequest(AIRequest aiRequest, ChatbotRequest chatbotRequest) {
+        List<AIContext> contexts = new ArrayList<>();
+
+        List<ChatbotContext> chatbotContexts = chatbotRequest.getContextList();
+        for (ChatbotContext chatbotContext : chatbotContexts) {
+            AIContext context = new AIContext(chatbotContext.getName());
+            context.setParameters(chatbotContext.getData());
+            contexts.add(context);
         }
-        response.setContexts(contexts);
+
+        aiRequest.setContexts(contexts);
     }
 
 }

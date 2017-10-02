@@ -7,9 +7,9 @@ import java.util.Map;
 public class ChatbotContext {
 
     private String name;
-    private Map<String, JsonElement> data;
+    private Map<String, String> data;
 
-    public ChatbotContext(String name, Map<String, JsonElement> data) {
+    public ChatbotContext(String name, Map<String, String> data) {
         this.name = name;
         this.data = data;
     }
@@ -26,11 +26,11 @@ public class ChatbotContext {
         this.name = name;
     }
 
-    public Map<String, JsonElement> getData() {
+    public Map<String, String> getData() {
         return data;
     }
 
-    public void setData(Map<String, JsonElement> data) {
+    public void setData(Map<String, String> data) {
         this.data = data;
     }
 }
