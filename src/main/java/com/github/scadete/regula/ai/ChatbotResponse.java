@@ -3,6 +3,7 @@ package com.github.scadete.regula.ai;
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
 import java.util.Map;
 
 public class ChatbotResponse {
@@ -12,6 +13,17 @@ public class ChatbotResponse {
     private String speech;
     private String message;
     private String sessionId;
+    private List<ChatbotContext> contexts;
+
+    public ChatbotResponse() {
+    }
+
+    public ChatbotResponse(Double confidence, String speech, String message, String sessionId) {
+        this.confidence = confidence;
+        this.speech = speech;
+        this.message = message;
+        this.sessionId = sessionId;
+    }
 
     private Map<String, JsonElement> data;
 
@@ -61,5 +73,13 @@ public class ChatbotResponse {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public List<ChatbotContext> getContexts() {
+        return contexts;
+    }
+
+    public void setContexts(List<ChatbotContext> contexts) {
+        this.contexts = contexts;
     }
 }

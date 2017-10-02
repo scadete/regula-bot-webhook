@@ -44,7 +44,8 @@ public class RegulaTextMessageEventHandler extends RegulaEventHandler implements
             ChatbotResponse response = chatbot.textMessage(new ChatbotRequest(messageText, senderId));
             sendTextMessage(senderId, response.getSpeech());
 
-            if (!response.getAction().isEmpty() || response.getAction() != null) {
+            String action  = response.getAction();
+            if (action != null && !action.isEmpty() && !action.equals("input.welcome")) {
                 ChatbotResponse finalResponse = fullfillResponse(response);
                 sendTextMessage(senderId, finalResponse.getSpeech());
             }
