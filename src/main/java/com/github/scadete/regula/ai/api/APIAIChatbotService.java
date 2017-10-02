@@ -40,6 +40,9 @@ public class APIAIChatbotService implements ChatbotService {
         AIServiceContext context = (new AIServiceContextBuilder()).setSessionId(request.getSessionId()).build();
         AIDataService service = new AIDataService(aiConfig, context);
 
+        AIRequest aiRequest = new AIRequest(request.getMessage());
+        aiRequest.setSessionId(request.getSessionId());
+
         try {
             Map<String, String> requestParameters = request.getParameters();
             if (requestParameters != null && !requestParameters.isEmpty())
@@ -47,10 +50,12 @@ public class APIAIChatbotService implements ChatbotService {
                 AIContext requestContext = new AIContext(UUID.randomUUID().toString());
                 requestContext.setLifespan(1);
                 requestContext.setParameters(requestParameters);
-                service.addActiveContext(requestContext);
+                aiRequest.addContext(requestContext);
+                logger.debug("New request context: '{}'", requestContext);
             }
 
-            AIResponse response = service.request(new AIRequest(request.getMessage()), context);
+            AIResponse response = service.request(aiRequest, context);
+            logger.debug(response.getResult().toString());
             return getResponse(response);
         } catch (AIServiceException e) {
             logger.error(e.getMessage(),e);
