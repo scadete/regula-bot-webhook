@@ -2,6 +2,7 @@ package com.github.scadete.regula.ai;
 
 import com.google.gson.JsonElement;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ChatbotContext {
@@ -12,6 +13,7 @@ public class ChatbotContext {
 
     public ChatbotContext(String name, int lifespan) {
         this.name = name;
+        this.data = new HashMap<>();
         this.lifespan = lifespan;
     }
 
@@ -23,6 +25,7 @@ public class ChatbotContext {
 
     public ChatbotContext(String name) {
         this.name = name;
+        this.data = new HashMap<>();
         this.lifespan = 7;
     }
 
