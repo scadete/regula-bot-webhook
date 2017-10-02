@@ -31,20 +31,16 @@ public class APIAIChatbotService implements ChatbotService {
     }
 
     @Override
-    public ChatbotResponse textMessage(ChatbotRequest request) {
-        logger.debug("ChatbotService textMessage -  message: '{}', from: '{}'",
+    public ChatbotResponse converse(ChatbotRequest request) {
+        logger.debug("ChatbotService converse -  message: '{}', from: '{}'",
                 request.getMessage(),
                 request.getSessionId());
 
         AIServiceContext context = (new AIServiceContextBuilder()).setSessionId(request.getSessionId()).build();
         AIDataService service = new AIDataService(aiConfig, context);
 
-        AIRequest aiRequest = new AIRequest(request.getMessage());
-        aiRequest.setSessionId(request.getSessionId());
-        setContextFromChatbotRequest(aiRequest, request);
-
         try {
-            AIResponse response = service.request(aiRequest);
+            AIResponse response = service.request(getAIRequest(request));
             logger.debug(response.getResult().toString());
             return getResponse(response);
         } catch (AIServiceException e) {
@@ -54,28 +50,19 @@ public class APIAIChatbotService implements ChatbotService {
         return null; // FIXME
     }
 
-    @Override
-    public ChatbotResponse voiceMessage(ChatbotRequest request) {
-        return null;
-    }
+    private AIRequest getAIRequest(ChatbotRequest request) {
+        AIRequest aiRequest = new AIRequest();
+        aiRequest.setSessionId(request.getSessionId());
+        String eventName = request.getEvent();
 
-    @Override
-    public ChatbotResponse attachment(ChatbotRequest request) {
-        logger.debug("ChatbotService attachment - from: '{}'", request.getSessionId());
-        AIServiceContext context = (new AIServiceContextBuilder()).setSessionId(request.getSessionId()).build();
-        AIDataService service = new AIDataService(aiConfig, context);
-
-        AIRequest aiRequest = new AIRequest("e=ATTACHMENT_RECEIVED");
-
-        logger.debug("Attachment request: {}", aiRequest.toString());
-
-        try {
-            return getResponse(service.request(aiRequest));
-        } catch (AIServiceException e) {
-            logger.error(e.getMessage(),e);
-            e.printStackTrace();
+        if (eventName != null && !eventName.isEmpty()) {
+            aiRequest.setEvent(new AIEvent(eventName));
         }
-        return null; // FIXME
+        aiRequest.setQuery(request.getMessage());
+
+        setContextFromChatbotRequest(aiRequest, request);
+
+        return aiRequest;
     }
 
     private ChatbotResponse getResponse(AIResponse aiResponse) {
@@ -114,7 +101,11 @@ public class APIAIChatbotService implements ChatbotService {
         if (chatbotContexts != null) {
             for (ChatbotContext chatbotContext : chatbotContexts) {
                 AIContext context = new AIContext(chatbotContext.getName());
-                context.setParameters(chatbotContext.getData());
+                Map<String, String> chatbotContextData = chatbotContext.getData();
+                if (chatbotContextData != null) {
+                    context.setParameters(chatbotContextData);
+                }
+                context.setLifespan(chatbotContext.getLifespan());
                 contexts.add(context);
             }
         }

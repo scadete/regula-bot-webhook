@@ -77,12 +77,12 @@ public abstract class RegulaEventHandler {
         String processId = initialResponse.getData().get("businessKey").getAsString();
         if (processId.endsWith("F")) {
             message = "e=RETURN_PROCESS_FOUND";
-            requestParameters.put("reviewText", "Este é um exemplo de texto de revisão\r\nAtt.,\r\nRevisor.");
+            requestParameters.put("reviewText", "Este é um exemplo de texto de revisão\n\nAtt.,\nRevisor.");
             request.setMessage(message);
             request.addContext(new ChatbotContext("process-solve-params", requestParameters));
         }
 
-        ChatbotResponse response = chatbot.textMessage(request);
+        ChatbotResponse response = chatbot.converse(request);
         return response;
     }
 
@@ -92,7 +92,7 @@ public abstract class RegulaEventHandler {
 
     private ChatbotResponse attachmentSendAction(ChatbotResponse initialResponse) {
         ChatbotRequest request = new ChatbotRequest("e=ATTACHMENT_RECEIVED", initialResponse.getSessionId());
-        ChatbotResponse response = chatbot.textMessage(request);
+        ChatbotResponse response = chatbot.converse(request);
         return response;
     }
 

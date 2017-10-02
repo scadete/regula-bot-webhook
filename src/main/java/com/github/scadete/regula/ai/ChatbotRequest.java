@@ -3,11 +3,10 @@ package com.github.scadete.regula.ai;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ChatbotRequest {
     private String message;
-    private String action;
+    private String event;
     private String sessionId;
 
     private InputStream voiceStream;
@@ -69,12 +68,12 @@ public class ChatbotRequest {
         this.contextList = contextList;
     }
 
-    public String getAction() {
-        return action;
+    public String getEvent() {
+        return event;
     }
 
-    public void setAction(String action) {
-        this.action = action;
+    public void setEvent(String event) {
+        this.event = event;
     }
 
     public void addContext(ChatbotContext context) {

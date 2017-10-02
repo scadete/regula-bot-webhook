@@ -41,7 +41,7 @@ public class RegulaTextMessageEventHandler extends RegulaEventHandler implements
             this.sendClient.sendSenderAction(senderId, SenderAction.MARK_SEEN);
             ChatbotRequest request = new ChatbotRequest(messageText, senderId);
 
-            ChatbotResponse response = chatbot.textMessage(new ChatbotRequest(messageText, senderId));
+            ChatbotResponse response = chatbot.converse(new ChatbotRequest(messageText, senderId));
             sendTextMessage(senderId, response.getSpeech());
 
             String action  = response.getAction();
