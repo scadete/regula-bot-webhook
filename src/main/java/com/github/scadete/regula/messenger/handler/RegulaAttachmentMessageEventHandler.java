@@ -60,7 +60,7 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
                 // TODO unsupported
             }
 
-            ChatbotRequest request = new ChatbotRequest();
+            ChatbotRequest request = new ChatbotRequest(senderId);
             request.setEvent("ATTACHMENT_RECEIVED");
 
             ChatbotContext context = new ChatbotContext("attachment-urls", 10);
