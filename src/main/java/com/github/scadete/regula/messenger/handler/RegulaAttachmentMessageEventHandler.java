@@ -10,10 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler implements AttachmentMessageEventHandler {
@@ -38,8 +35,6 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
         logger.info("Received message '{}' with attachments from user '{}' at '{}':",
                 messageId, senderId, timestamp);
 
-
-        int payloadId = 0;
         Map<String, String> payloadMap = new HashMap<>();
 
         boolean hasAudio = false;
@@ -54,7 +49,7 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
                 if (attachmentType.equals(AttachmentMessageEvent.AttachmentType.AUDIO)) {
                     hasAudio = true;
                 }
-                payloadMap.put(String.valueOf(payloadId), payloadAsString);
+                payloadMap.put(UUID.randomUUID().toString(), payloadAsString);
 
             } else {
                 hasUnsupported = true;
@@ -67,7 +62,11 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
 
         ChatbotRequest request = new ChatbotRequest(senderId);
 
-        if (!hasAudio && !hasUnsupported) {
+        if (hasUnsupported) {
+            // TODO
+        } else if (hasAudio) {
+            request.setMessage("audio"); //TODO
+        } else {
             request.setEvent("ATTACHMENT_RECEIVED");
             request.addContext(context);
         }
