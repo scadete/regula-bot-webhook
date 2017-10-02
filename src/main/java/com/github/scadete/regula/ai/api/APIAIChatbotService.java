@@ -111,12 +111,13 @@ public class APIAIChatbotService implements ChatbotService {
         List<AIContext> contexts = new ArrayList<>();
 
         List<ChatbotContext> chatbotContexts = chatbotRequest.getContextList();
-        for (ChatbotContext chatbotContext : chatbotContexts) {
-            AIContext context = new AIContext(chatbotContext.getName());
-            context.setParameters(chatbotContext.getData());
-            contexts.add(context);
+        if (chatbotContexts != null) {
+            for (ChatbotContext chatbotContext : chatbotContexts) {
+                AIContext context = new AIContext(chatbotContext.getName());
+                context.setParameters(chatbotContext.getData());
+                contexts.add(context);
+            }
         }
-
         aiRequest.setContexts(contexts);
     }
 
