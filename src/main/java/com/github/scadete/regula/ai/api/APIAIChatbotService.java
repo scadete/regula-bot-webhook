@@ -52,9 +52,10 @@ public class APIAIChatbotService implements ChatbotService {
                 requestContext.setParameters(requestParameters);
                 aiRequest.addContext(requestContext);
                 logger.debug("New request context: '{}'", requestContext.getName());
+                service.addActiveContext(requestContext);
             }
 
-            AIResponse response = service.request(aiRequest, context);
+            AIResponse response = service.request(aiRequest);
             logger.debug(response.getResult().toString());
             return getResponse(response);
         } catch (AIServiceException e) {
