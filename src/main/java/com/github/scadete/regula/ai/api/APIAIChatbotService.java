@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -95,6 +96,9 @@ public class APIAIChatbotService implements ChatbotService {
 
     private void setDataFromAIResponse(ChatbotResponse response, AIResponse aiResponse) {
         Map<String, JsonElement> dataMap = response.getData();
+        if (dataMap == null) {
+            dataMap = new HashMap<>();
+        }
         dataMap.putAll(aiResponse.getResult().getParameters());
     }
 
