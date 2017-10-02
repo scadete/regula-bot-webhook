@@ -71,7 +71,7 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
             request.setEvent("ATTACHMENT_RECEIVED");
             request.addContext(context);
         }
-        
+
         String response = chatbot.converse(request).getSpeech();
         sendTextMessage(senderId, response);
     }

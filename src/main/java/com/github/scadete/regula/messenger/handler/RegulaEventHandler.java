@@ -68,19 +68,22 @@ public abstract class RegulaEventHandler {
     }
 
     private ChatbotResponse processSolveAction(ChatbotResponse initialResponse) {
-        String message = "e=RETURN_PROCESS_NOT_FOUND";
-        ChatbotRequest request = new ChatbotRequest(message, initialResponse.getSessionId());
+        ChatbotRequest request = new ChatbotRequest(initialResponse.getSessionId());
 
         Map<String, String> requestParameters = new HashMap<>();
 
-        // FIXME Sample Business Rule
+        // TODO Sample Business Rule
+        String event = "RETURN_PROCESS_NOT_FOUND";
         String processId = initialResponse.getData().get("businessKey").getAsString();
         if (processId.endsWith("F")) {
-            message = "e=RETURN_PROCESS_FOUND";
+
+            event = "RETURN_PROCESS_FOUND";
             requestParameters.put("reviewText", "Este é um exemplo de texto de revisão\n\nAtt.,\nRevisor.");
-            request.setMessage(message);
+
             request.addContext(new ChatbotContext("process-solve-params", requestParameters));
         }
+
+        request.setEvent(event);
 
         ChatbotResponse response = chatbot.converse(request);
         return response;
@@ -91,7 +94,8 @@ public abstract class RegulaEventHandler {
     }
 
     private ChatbotResponse attachmentSendAction(ChatbotResponse initialResponse) {
-        ChatbotRequest request = new ChatbotRequest("e=ATTACHMENT_RECEIVED", initialResponse.getSessionId());
+        ChatbotRequest request = new ChatbotRequest(initialResponse.getSessionId());
+        request.setEvent("ATTACHMENT_SEND_SUCCESS");
         ChatbotResponse response = chatbot.converse(request);
         return response;
     }
