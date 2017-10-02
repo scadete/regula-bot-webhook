@@ -42,13 +42,13 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
         int payloadId = 0;
         Map<String, String> payloadMap = new HashMap<>();
 
-        attachments.forEach(attachment -> {
+        boolean hasAudio = false;
+        boolean hasUnsupported = false;
+        for (AttachmentMessageEvent.Attachment attachment: attachments) {
             final AttachmentMessageEvent.AttachmentType attachmentType = attachment.getType();
             final AttachmentMessageEvent.Payload payload = attachment.getPayload();
-            String response = "";
 
             String payloadAsString = "";
-            boolean hasAudio = false;
             if (payload.isBinaryPayload()) {
                 payloadAsString = payload.asBinaryPayload().getUrl();
                 if (attachmentType.equals(AttachmentMessageEvent.AttachmentType.AUDIO)) {
@@ -57,22 +57,22 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
                 payloadMap.put(String.valueOf(payloadId), payloadAsString);
 
             } else {
-                // TODO unsupported
+                hasUnsupported = true;
             }
-
-            ChatbotRequest request = new ChatbotRequest(senderId);
-            request.setEvent("ATTACHMENT_RECEIVED");
-
-            ChatbotContext context = new ChatbotContext("attachment-urls", 10);
-            context.getData().putAll(payloadMap);
-            request.addContext(context);
-
-            response = chatbot.converse(request).getSpeech();
-            sendTextMessage(senderId, response);
-
             logger.info("Attachment of type '{}' with payload '{}'", attachmentType, payloadAsString);
-        });
+        }
 
+        ChatbotContext context = new ChatbotContext("attachment-urls", 10);
+        context.getData().putAll(payloadMap);
 
+        ChatbotRequest request = new ChatbotRequest(senderId);
+
+        if (!hasAudio && !hasUnsupported) {
+            request.setEvent("ATTACHMENT_RECEIVED");
+            request.addContext(context);
+        }
+        
+        String response = chatbot.converse(request).getSpeech();
+        sendTextMessage(senderId, response);
     }
 }
