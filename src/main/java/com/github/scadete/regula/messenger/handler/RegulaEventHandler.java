@@ -8,6 +8,7 @@ import com.github.messenger4j.send.Recipient;
 import com.github.scadete.regula.ai.ChatbotRequest;
 import com.github.scadete.regula.ai.ChatbotResponse;
 import com.github.scadete.regula.ai.ChatbotService;
+import com.google.gson.JsonElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,15 @@ public abstract class RegulaEventHandler {
     }
 
     private ChatbotResponse processSolveAction(ChatbotResponse initialResponse) {
-        ChatbotRequest request = new ChatbotRequest("e=RETURN_PROCESS_FOUND", initialResponse.getSessionId());
+        String message = "e=RETURN_PROCESS_NOT_FOUND";
+        String processId = initialResponse.getData().get("businessKey").getAsString();
+
+        // FIXME Sample Business Rule
+        if (processId.endsWith("F")) {
+            message = "e=RETURN_PROCESS_FOUND";
+        }
+
+        ChatbotRequest request = new ChatbotRequest(message, initialResponse.getSessionId());
         ChatbotResponse response = chatbot.textMessage(request);
         return response;
     }
