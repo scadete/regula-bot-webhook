@@ -1,14 +1,7 @@
 package com.github.scadete.regula.stt.google;
 
 import com.github.scadete.regula.stt.SpeechToTextService;
-import com.google.api.gax.core.GoogleCredentialsProvider;
-import com.google.api.gax.rpc.OperationFuture;
-import com.google.auth.Credentials;
-import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.speech.v1.*;
-import com.google.longrunning.Operation;
 import com.google.protobuf.ByteString;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
@@ -85,15 +78,8 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
                 .setContent(ByteString.copyFrom(Files.readAllBytes(tempOutputFile.toPath())))
                 .build();
 
-        OperationFuture<LongRunningRecognizeResponse, LongRunningRecognizeMetadata,
-                        Operation> response =
-                speech.longRunningRecognizeAsync(config, audio);
-        while (!response.isDone()) {
-            logger.debug("Waiting for response...");
-            Thread.sleep(5000);
-        }
-
-        List<SpeechRecognitionResult> results = response.get().getResultsList();
+        RecognizeResponse response = speech.recognize(config, audio);
+        List<SpeechRecognitionResult> results = response.getResultsList();
 
         speech.close();
 
@@ -102,15 +88,4 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
 
         return results.get(0).getAlternatives(0).getTranscript();
     }
-/**
-    public static void main(String[] args) {
-        GoogleSpeechToTextService stt = new GoogleSpeechToTextService();
-        try {
-            String text = stt.convert("https://cdn.fbsbx.com/v/t59.3654-21/21753671_10214150198169909_5776322024859238400_n.mp4/audioclip-1506984727000-2944.mp4?oh=d6a062d2d48758fa5708062ca705f277&oe=59D4E3FE");
-            System.out.println(text);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
- **/
 }
