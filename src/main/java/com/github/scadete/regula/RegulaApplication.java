@@ -12,9 +12,6 @@ import javax.annotation.Resource;
 @SpringBootApplication
 public class RegulaApplication {
     private static final Logger logger = LoggerFactory.getLogger(RegulaApplication.class);
-    @Autowired
-    @Resource(name="googleSpeechToTextService")
-    SpeechToTextService sttService;
 
     public static void main(String[] args) {
         logger.debug("RegulaApplication");
