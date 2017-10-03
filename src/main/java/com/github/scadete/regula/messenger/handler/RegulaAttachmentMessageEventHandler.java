@@ -73,6 +73,7 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
             // TODO
         } else if (audioUrl != null && !audioUrl.isEmpty()) {
             try {
+                logger.debug("Using STT: {}", sttService.getClass().getSimpleName());
                 request.setMessage(sttService.convert(audioUrl));
             } catch (Exception e) {
                 logger.error("Failed to convert audio", e);
