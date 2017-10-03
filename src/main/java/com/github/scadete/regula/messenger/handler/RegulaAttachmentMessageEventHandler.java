@@ -4,6 +4,7 @@ import com.github.messenger4j.receive.events.AttachmentMessageEvent;
 import com.github.messenger4j.receive.handlers.AttachmentMessageEventHandler;
 import com.github.scadete.regula.ai.ChatbotContext;
 import com.github.scadete.regula.ai.ChatbotRequest;
+import com.github.scadete.regula.ai.ChatbotResponse;
 import com.github.scadete.regula.ai.ChatbotService;
 import com.github.scadete.regula.stt.SpeechToTextService;
 import org.slf4j.Logger;
@@ -85,8 +86,14 @@ public class RegulaAttachmentMessageEventHandler  extends RegulaEventHandler imp
             request.addContext(context);
         }
 
-        String response = chatbot.converse(request).getSpeech();
+        ChatbotResponse response = chatbot.converse(request);
 
-        sendTextMessage(senderId, response);
+        sendTextMessage(senderId, response.getSpeech());
+
+        String action  = response.getAction();
+        if (action != null && !action.isEmpty() && !action.startsWith("input.")) {
+            ChatbotResponse finalResponse = fullfillResponse(response);
+            sendTextMessage(senderId, finalResponse.getSpeech());
+        }
     }
 }
