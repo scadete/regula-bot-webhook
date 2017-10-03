@@ -100,7 +100,7 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
         FileUtils.deleteQuietly(tempInputFile);
         FileUtils.deleteQuietly(tempOutputFile);
 
-        return results.get(0).toString();
+        return results.get(0).getAlternatives(0).getTranscript();
     }
 /**
     public static void main(String[] args) {
