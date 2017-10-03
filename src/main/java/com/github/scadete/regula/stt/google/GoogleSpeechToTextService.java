@@ -5,12 +5,14 @@ import com.google.api.gax.rpc.OperationFuture;
 import com.google.cloud.speech.v1.*;
 import com.google.longrunning.Operation;
 import com.google.protobuf.ByteString;
-import net.sourceforge.javaflacencoder.FLAC_FileEncoder;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -23,6 +25,8 @@ import java.util.UUID;
 @Component("googleSpeechToTextService")
 public class GoogleSpeechToTextService implements SpeechToTextService {
     private static final Logger logger = LoggerFactory.getLogger(GoogleSpeechToTextService.class);
+
+    private static final int SAMPLE_BIT_RATE = 16000;
 
     @Override
     public String convert(String audioUrl) throws Exception {
@@ -38,8 +42,22 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
             Files.copy(in, tempInputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        FLAC_FileEncoder flacEncoder = new FLAC_FileEncoder();
-        flacEncoder.encode(tempInputFile, tempOutputFile);
+        FFmpeg ffmpeg = new FFmpeg("ffmpeg");
+        FFprobe ffprobe = new FFprobe("ffprobe");
+
+        FFmpegBuilder builder = new FFmpegBuilder()
+                .setInput(tempInputFile.getAbsolutePath())     // Filename, or a FFmpegProbeResult
+                .overrideOutputFiles(true) // Override the output if it exists
+
+                .addOutput(tempOutputFile.getAbsolutePath())
+                .setAudioSampleRate(SAMPLE_BIT_RATE)
+                .setAudioChannels(1)
+                .done();
+
+        FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
+
+        // Run a one-pass encode
+        executor.createJob(builder).run();
 
         SpeechClient speech = SpeechClient.create();
 
@@ -47,7 +65,7 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
         RecognitionConfig config = RecognitionConfig.newBuilder()
                 .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
                 .setLanguageCode("pt-BR")
-                .setSampleRateHertz(8000)
+                .setSampleRateHertz(SAMPLE_BIT_RATE)
                 .build();
         RecognitionAudio audio = RecognitionAudio.newBuilder()
                 .setContent(ByteString.copyFrom(Files.readAllBytes(tempOutputFile.toPath())))
@@ -57,7 +75,7 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
                         Operation> response =
                 speech.longRunningRecognizeAsync(config, audio);
         while (!response.isDone()) {
-            System.out.println("Waiting for response...");
+            logger.debug("Waiting for response...");
             Thread.sleep(5000);
         }
 
@@ -65,16 +83,9 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
 
         speech.close();
 
-        return results.get(0).toString();
-    }
+        FileUtils.deleteQuietly(tempInputFile);
+        FileUtils.deleteQuietly(tempOutputFile);
 
-    public static void main(String[] args) {
-        GoogleSpeechToTextService stt = new GoogleSpeechToTextService();
-        try {
-            String text = stt.convert("https://cdn.fbsbx.com/v/t59.3654-21/21753671_10214150198169909_5776322024859238400_n.mp4/audioclip-1506984727000-2944.mp4?oh=d6a062d2d48758fa5708062ca705f277&oe=59D4E3FE");
-            System.out.println(text);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return results.get(0).toString();
     }
 }
