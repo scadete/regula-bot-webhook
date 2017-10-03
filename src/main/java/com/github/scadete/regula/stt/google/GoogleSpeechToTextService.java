@@ -1,7 +1,12 @@
 package com.github.scadete.regula.stt.google;
 
 import com.github.scadete.regula.stt.SpeechToTextService;
+import com.google.api.gax.core.GoogleCredentialsProvider;
 import com.google.api.gax.rpc.OperationFuture;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.speech.v1.*;
 import com.google.longrunning.Operation;
 import com.google.protobuf.ByteString;
@@ -31,6 +36,7 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
     @Override
     public String convert(String audioUrl) throws Exception {
 
+
         String tempExecId = UUID.randomUUID().toString();
         File tempInputFile = File.createTempFile("temp_" + tempExecId, "_in.mp4");
         File tempOutputFile = File.createTempFile("temp_" + tempExecId, "_out.flac");
@@ -59,8 +65,16 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
         // Run a one-pass encode
         executor.createJob(builder).run();
 
-        SpeechClient speech = SpeechClient.create();
+        //ServiceAccountCredentials.newBuilder().setClientEmail().build().;
+        File credentialsFile = new File("google-credentials.json");
 
+        if(!credentialsFile.exists()) {
+            String content = System.getenv("GOOGLE_CREDENTIALS");
+            FileUtils.writeStringToFile(credentialsFile, content, "UTF-8");
+        }
+
+
+        SpeechClient speech = SpeechClient.create();
         // Configure remote file request for Linear16
         RecognitionConfig config = RecognitionConfig.newBuilder()
                 .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
@@ -88,4 +102,15 @@ public class GoogleSpeechToTextService implements SpeechToTextService {
 
         return results.get(0).toString();
     }
+/**
+    public static void main(String[] args) {
+        GoogleSpeechToTextService stt = new GoogleSpeechToTextService();
+        try {
+            String text = stt.convert("https://cdn.fbsbx.com/v/t59.3654-21/21753671_10214150198169909_5776322024859238400_n.mp4/audioclip-1506984727000-2944.mp4?oh=d6a062d2d48758fa5708062ca705f277&oe=59D4E3FE");
+            System.out.println(text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+ **/
 }
